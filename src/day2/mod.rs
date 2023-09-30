@@ -1,5 +1,4 @@
 use crate::shared::read_input;
-use std::cmp;
 
 // Opponent moves:
 // A = Rock
@@ -90,7 +89,7 @@ pub fn day2b_solution() -> u32 {
 			'Y' => get_opponent_move_score(opponent_move) + 3,
 
 			// Win
-			_ => cmp::max((get_opponent_move_score(opponent_move) + 1) % 4, 1) + 6,
+			_ => (get_opponent_move_score(opponent_move) % 3) + 7,
 		};
 	}
 

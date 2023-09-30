@@ -1,5 +1,6 @@
 pub mod day1;
 pub mod day2;
+pub mod day3;
 pub mod shared;
 
 fn main() {
@@ -14,4 +15,10 @@ fn main() {
 		day2::day2a_solution(),
 		day2::day2b_solution()
 	);
+
+	println!(
+		"Day 3: {}, {}",
+		day3::day3a_solution(),
+		day3::day3b_solution()
+	)
 }
