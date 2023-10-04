@@ -1,8 +1,6 @@
 use crate::shared::read_input;
 use std::{cmp, collections::HashSet};
 
-const DELTAS: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
-
 #[derive(Clone, Default)]
 struct Pos(i32 /* x */, i32 /* y */);
 
@@ -10,19 +8,6 @@ impl Pos {
 	fn inc(&mut self, x_delta: i32, y_delta: i32) {
 		self.0 += x_delta;
 		self.1 += y_delta;
-	}
-
-	fn dec(&mut self, x_delta: i32, y_delta: i32) {
-		self.0 -= x_delta;
-		self.1 -= y_delta;
-	}
-
-	fn diff(&self, pos: &Pos) -> (i32, i32, i32) {
-		let x_diff = self.0 - pos.0;
-		let y_diff = self.1 - pos.1;
-		let diff = x_diff.abs() + y_diff.abs();
-
-		return (diff, x_diff, y_diff);
 	}
 }
 
@@ -34,35 +19,24 @@ struct Knot {
 
 impl Knot {
 	fn move_(&mut self, x_delta: i32, y_delta: i32) {
-		self.pos.0 += x_delta;
-		self.pos.1 += y_delta;
+		self.pos.inc(x_delta, y_delta);
 
 		if self.prev.is_none() {
 			return;
 		}
 
 		let prev = self.prev.as_mut().unwrap();
-		let (diff, x_diff, y_diff) = self.pos.diff(&prev.pos);
+		let x_diff = self.pos.0 - prev.pos.0;
+		let y_diff = self.pos.1 - prev.pos.1;
+		let diff = x_diff.abs() + y_diff.abs();
 
-		// Same row (move horizontally) or column (move vertically)
-		if cmp::min(x_diff.abs(), y_diff.abs()) == 0 && diff == 2 {
+		if
+		// Same row or column
+		(cmp::min(x_diff.abs(), y_diff.abs()) == 0 && diff == 2) ||
+			// An L or diagonally
+			[3, 4].contains(&diff)
+		{
 			prev.move_(x_diff.clamp(-1, 1), y_diff.clamp(-1, 1));
-		}
-		// An L
-		else if diff > 2 {
-			let mut target = prev.pos.clone();
-
-			for (x_delta, y_delta) in DELTAS {
-				target.inc(x_delta, y_delta);
-
-				let (inner_diff, _, _) = self.pos.diff(&target);
-
-				if [1, 2].contains(&inner_diff) {
-					return prev.move_(x_delta, y_delta);
-				}
-
-				target.dec(x_delta, y_delta);
-			}
 		}
 	}
 }
