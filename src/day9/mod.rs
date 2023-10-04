@@ -1,63 +1,67 @@
 use crate::shared::read_input;
-use std::collections::HashSet;
+use std::{cmp, collections::HashSet};
+
+const DELTAS: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+
+#[derive(Clone, Default)]
+struct Pos(i32 /* x */, i32 /* y */);
+
+impl Pos {
+	fn inc(&mut self, x_delta: i32, y_delta: i32) {
+		self.0 += x_delta;
+		self.1 += y_delta;
+	}
+
+	fn dec(&mut self, x_delta: i32, y_delta: i32) {
+		self.0 -= x_delta;
+		self.1 -= y_delta;
+	}
+
+	fn diff(&self, pos: &Pos) -> (i32, i32, i32) {
+		let x_diff = self.0 - pos.0;
+		let y_diff = self.1 - pos.1;
+		let diff = x_diff.abs() + y_diff.abs();
+
+		return (diff, x_diff, y_diff);
+	}
+}
 
 #[derive(Clone, Default)]
 struct Knot {
-	x: i32,
-	y: i32,
+	pos: Pos,
 	prev: Option<Box<Knot>>,
 }
 
 impl Knot {
 	fn move_(&mut self, x_delta: i32, y_delta: i32) {
-		self.x += x_delta;
-		self.y += y_delta;
+		self.pos.0 += x_delta;
+		self.pos.1 += y_delta;
 
 		if self.prev.is_none() {
 			return;
 		}
 
 		let prev = self.prev.as_mut().unwrap();
+		let (diff, x_diff, y_diff) = self.pos.diff(&prev.pos);
 
-		// Same row
-		if self.x == prev.x {
-			let diff = self.y - prev.y;
-
-			if diff.abs() == 2 {
-				prev.move_(0, diff.clamp(-1, 1));
-			}
-
-			return;
-		} else if self.y == prev.y {
-			let diff = self.x - prev.x;
-
-			if diff.abs() == 2 {
-				prev.move_(diff.clamp(-1, 1), 0);
-			}
-
-			return;
+		// Same row (move horizontally) or column (move vertically)
+		if cmp::min(x_diff.abs(), y_diff.abs()) == 0 && diff == 2 {
+			prev.move_(x_diff.clamp(-1, 1), y_diff.clamp(-1, 1));
 		}
+		// An L
+		else if diff > 2 {
+			let mut target = prev.pos.clone();
 
-		let x_diff = prev.x - self.x;
-		let y_diff = prev.y - self.y;
+			for (x_delta, y_delta) in DELTAS {
+				target.inc(x_delta, y_delta);
 
-		// An L or diagonally
-		if x_diff.abs() + y_diff.abs() > 2 {
-			let deltas = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+				let (inner_diff, _, _) = self.pos.diff(&target);
 
-			for (x_delta, y_delta) in deltas {
-				let mut target = prev.clone();
-				target.move_(x_delta, y_delta);
-
-				let x_inner_diff = self.x - target.x;
-				let y_inner_diff = self.y - target.y;
-
-				if x_inner_diff.abs() + y_inner_diff.abs() == 1
-					|| x_inner_diff.abs() + y_inner_diff.abs() == 2
-				{
-					prev.move_(x_delta, y_delta);
-					break;
+				if [1, 2].contains(&inner_diff) {
+					return prev.move_(x_delta, y_delta);
 				}
+
+				target.dec(x_delta, y_delta);
 			}
 		}
 	}
@@ -107,7 +111,7 @@ impl Rope {
 				}
 				None => {
 					self.tail_visited
-						.insert(format!("{},{}", current.x, current.y));
+						.insert(format!("{},{}", current.pos.0, current.pos.1));
 					break;
 				}
 			}
