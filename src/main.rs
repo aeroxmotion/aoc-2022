@@ -58,5 +58,9 @@ fn main() {
 		day8::day8b_solution()
 	);
 
-	println!("Day 9: {}, {}", day9::day9a_solution(), 1);
+	println!(
+		"Day 9: {}, {}",
+		day9::day9a_solution(),
+		day9::day9b_solution()
+	);
 }
