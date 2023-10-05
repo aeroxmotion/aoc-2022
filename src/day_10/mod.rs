@@ -3,6 +3,7 @@ use crate::shared::read_input;
 struct Executor {
 	reg_x: i32,
 	in_addx: bool,
+	addx_value: i32,
 	current_cycle: usize,
 	instructions: Vec<String>,
 }
@@ -21,6 +22,7 @@ impl Executor {
 		Executor {
 			reg_x: 1,
 			instructions,
+			addx_value: 0,
 			in_addx: false,
 			current_cycle: 1,
 		}
@@ -31,20 +33,25 @@ impl Iterator for Executor {
 	type Item = (i32, usize);
 
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.current_cycle > self.instructions.len() {
+		let cycle = self.current_cycle;
+
+		if cycle > self.instructions.len() {
 			return None;
 		}
 
-		let ins = &self.instructions[self.current_cycle - 1];
+		let ins = &self.instructions[cycle - 1];
 
 		if self.in_addx {
-			self.reg_x += ins.parse::<i32>().unwrap();
+			self.addx_value = ins.parse::<i32>().unwrap();
+		} else if self.addx_value != 0 {
+			self.reg_x += self.addx_value;
+			self.addx_value = 0;
 		}
 
 		self.in_addx = ins == "addx";
 		self.current_cycle += 1;
 
-		return Some((self.reg_x, self.current_cycle));
+		return Some((self.reg_x, cycle));
 	}
 }
 

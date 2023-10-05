@@ -66,7 +66,7 @@ fn main() {
 	);
 
 	println!(
-		"Day 10: {}, \n#{}",
+		"Day 10: {}, \n{}",
 		day_10::day10a_solution(),
 		day_10::day10b_solution()
 	);
