@@ -8,6 +8,7 @@ pub mod day7;
 pub mod day8;
 pub mod day9;
 pub mod day_10;
+pub mod day_11;
 pub mod shared;
 
 fn main() {
@@ -69,5 +70,11 @@ fn main() {
 		"Day 10: {}, \n{}",
 		day_10::day10a_solution(),
 		day_10::day10b_solution()
+	);
+
+	println!(
+		"Day 11: {}, {}",
+		day_11::day11a_solution(),
+		day_11::day11b_solution()
 	);
 }
