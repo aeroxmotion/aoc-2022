@@ -111,10 +111,12 @@ fn day11_solution(rounds: u32, divide: bool) -> u128 {
 				let mut next_worry_level = match monkey.operation {
 					Operation::Add(n) => item + get_n(n),
 					Operation::Mul(n) => item * get_n(n),
-				} % modulus;
+				};
 
 				if divide {
 					next_worry_level /= 3;
+				} else {
+					next_worry_level %= modulus;
 				}
 
 				let target_monkey = if next_worry_level % monkey.test.condition == 0 {
@@ -155,5 +157,6 @@ mod tests {
 	#[test]
 	fn it_should_find_the_solution() {
 		assert_eq!(super::day11a_solution(), 99_852);
+		assert_eq!(super::day11b_solution(), 25_935_263_541);
 	}
 }
