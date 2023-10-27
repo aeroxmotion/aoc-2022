@@ -44,30 +44,24 @@ impl Into<Value> for u8 {
 
 fn parse(input: &str) -> Value {
 	let mut parsed = vec![];
-	let mut num_to_parse = String::new();
+	let mut num_to_parse = String::with_capacity(2);
 
 	for char in input.as_bytes() {
 		match *char as char {
 			' ' => {}
-			'[' => {
-				parsed.push(vec![]);
-			}
+			'[' => parsed.push(vec![]),
 			',' => {
-				if !num_to_parse.is_empty() {
-					parsed
-						.last_mut()
-						.unwrap()
-						.push(num_to_parse.parse::<u8>().unwrap().into());
-
-					num_to_parse = String::new();
+				if let Ok(num) = num_to_parse.parse::<u8>() {
+					parsed.last_mut().unwrap().push(num.into());
+					num_to_parse.clear();
 				}
 			}
 			']' => {
 				let mut target = parsed.pop().unwrap();
 
-				if !num_to_parse.is_empty() {
-					target.push(num_to_parse.parse::<u8>().unwrap().into());
-					num_to_parse = String::new();
+				if let Ok(num) = num_to_parse.parse::<u8>() {
+					target.push(num.into());
+					num_to_parse.clear();
 				}
 
 				if parsed.is_empty() {
@@ -140,17 +134,17 @@ pub fn day13b_solution() -> usize {
 	arrs.append(&mut sentinels.to_vec());
 	arrs.sort_by(|a, b| cmp(a.clone(), b.clone()));
 
-	for (i, arr) in arrs.iter().enumerate() {
+	for (arr, i) in arrs.iter().zip(1..) {
 		if sentinels.contains(arr) {
-			result *= i + 1;
+			result *= i;
 
-			if result != i + 1 {
-				break;
+			if result != i {
+				return result;
 			}
 		}
 	}
 
-	result
+	0
 }
 
 #[cfg(test)]
