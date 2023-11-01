@@ -8,7 +8,9 @@ enum Unit {
 	Rock = '#' as u8,
 }
 
-pub fn day14a_solution() -> u32 {
+const MAGIC_AIR_SPAN: usize = 200;
+
+fn day14_solution(part2: bool) -> u32 {
 	let input = read_input(14);
 	let instructions = input.lines().map(|line| {
 		line.split(" -> ").map(|coords| {
@@ -31,7 +33,18 @@ pub fn day14a_solution() -> u32 {
 		}
 	}
 
-	let mut grid = vec![vec![Unit::Air; x_range.1 - x_range.0 + 1]; y_max + 1];
+	if part2 {
+		x_range.0 -= MAGIC_AIR_SPAN;
+		x_range.1 += MAGIC_AIR_SPAN;
+	}
+
+	let mut grid =
+		vec![vec![Unit::Air; x_range.1 - x_range.0 + 1]; y_max + if part2 { 2 } else { 1 }];
+
+	if part2 {
+		grid.push(vec![Unit::Rock; x_range.1 - x_range.0 + 1]);
+		y_max += 2;
+	}
 
 	for ins in instructions.clone() {
 		let coords = ins.collect::<Vec<(usize, usize)>>();
@@ -73,8 +86,30 @@ pub fn day14a_solution() -> u32 {
 
 		grid[sand.1][sand.0 - x_range.0] = Unit::Sand;
 		count += 1;
+
+		if sand == (500, 0) {
+			break;
+		}
+
 		sand = (500, 0);
 	}
 
 	count
+}
+
+pub fn day14a_solution() -> u32 {
+	day14_solution(false)
+}
+
+pub fn day14b_solution() -> u32 {
+	day14_solution(true)
+}
+
+#[cfg(test)]
+mod tests {
+	#[test]
+	fn it_should_find_the_solution() {
+		assert_eq!(super::day14a_solution(), 1_513);
+		assert_eq!(super::day14b_solution(), 22_646);
+	}
 }
